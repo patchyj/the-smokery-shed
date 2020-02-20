@@ -4,6 +4,7 @@
   "description": "MERN Stack with ES6 and Typescript Boilerplate",
   "main": "server.js",
   "scripts": {
+    "dev-install": "npm i && npm run client install",
     "client-install": "npm install --prefix client",
     "start": "node server.js",
     "server": "nodemon server.js --exec babel-node --presets babel-preset-env",
@@ -21,8 +22,10 @@
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.16.3",
+    "is-empty": "^1.2.0",
     "jsonwebtoken": "^8.5.0",
-    "mongoose": "^5.1.6"
+    "mongoose": "^5.1.6",
+    "validator": "^12.2.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

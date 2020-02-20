@@ -1,15 +1,10 @@
 import React, { useEffect } from 'react';
-import AppNavbar from './components/AppNavbar';
-import ShoppingList from './components/ShoppingList';
-import ItemModal from './components/ItemModal';
-import { Container } from 'reactstrap';
-
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import store from './flux/store';
+import AppNavbar from './components/AppNavbar';
 import { loadUser } from './flux/actions/authActions';
-
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './App.css';
+import AuthContainer from './components/auth/AuthContainer';
 
 const App = () => {
   useEffect(() => {
@@ -18,13 +13,12 @@ const App = () => {
 
   return (
     <Provider store={store}>
-      <div className="App">
+      <Router>
         <AppNavbar />
-        <Container>
-          <ItemModal />
-          <ShoppingList />
-        </Container>
-      </div>
+        <Switch>
+          <Route path={'/auth'} component={AuthContainer} />
+        </Switch>
+      </Router>
     </Provider>
   );
 };

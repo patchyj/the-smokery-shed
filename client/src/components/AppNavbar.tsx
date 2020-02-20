@@ -1,63 +1,31 @@
-import React, { Fragment, useState } from 'react';
-import {
-  Collapse,
-  Navbar,
-  NavbarToggler,
-  NavbarBrand,
-  Nav,
-  NavItem,
-  Container
-} from 'reactstrap';
+import React, { Fragment } from 'react';
+import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
-import RegisterModal from './auth/RegisterModal';
-import LoginModal from './auth/LoginModal';
 import Logout from './auth/Logout';
 import { IAppNavbar, IAuthReduxProps } from '../types/interfaces';
 
 const AppNavbar = ({ auth }: IAppNavbar) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const handleToggle = () => setIsOpen(!isOpen);
-
-  const authLinks = (
-    <Fragment>
-      <NavItem>
-        <span className="navbar-text mr-3">
-          <strong>
-            {auth && auth.user ? `Welcome ${auth.user.name}` : ''}
-          </strong>
-        </span>
-      </NavItem>
-      <NavItem>
-        <Logout />
-      </NavItem>
-    </Fragment>
-  );
+  const authLinks = <Logout />;
 
   const guestLinks = (
     <Fragment>
-      <NavItem>
-        <RegisterModal />
-      </NavItem>
-      <NavItem>
-        <LoginModal />
-      </NavItem>
+      <Link to="/auth/login" className="item">
+        Login
+      </Link>
+      <Link to="/auth/register" className="item">
+        Register
+      </Link>
     </Fragment>
   );
 
   return (
-    <div>
-      <Navbar color="dark" dark expand="sm" className="mb-5">
-        <Container>
-          <NavbarBrand href="/">ShoppingList</NavbarBrand>
-          <NavbarToggler onClick={handleToggle} />
-          <Collapse isOpen={isOpen} navbar>
-            <Nav className="ml-auto" navbar>
-              {auth && auth.isAuthenticated ? authLinks : guestLinks}
-            </Nav>
-          </Collapse>
-        </Container>
-      </Navbar>
+    <div className="ui menu">
+      <div className="ui container">
+        <div className="header item">Your Site name</div>
+        <div className="right item">
+          {auth && auth.isAuthenticated ? authLinks : guestLinks}
+        </div>
+      </div>
     </div>
   );
 };

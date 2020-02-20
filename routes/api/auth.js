@@ -5,9 +5,35 @@ import jwt from 'jsonwebtoken';
 import auth from '../../middleware/auth';
 // User Model
 import User from '../../models/User';
+import validateLoginInput from '../../validation/login';
+import validateRegisterInput from '../../validation/register';
 
 const { JWT_SECRET } = config;
 const router = Router();
+
+const authValidation = (body, type) => {
+  const err = {};
+  if (!body.email) err.email = 'Email field missing';
+  if (!body.password) err.password = 'Password field missing';
+
+  if (type === 'REGISTER') {
+    if (!body.name) err.name = 'Name field missing';
+    if (!body.password2) err.password2 = 'Password Confirmation field missing';
+    if (body.password !== body.password2) err.noMatch = 'Passwords must match';
+  }
+
+  const response = {
+    success: true,
+    errors: {}
+  };
+
+  if (Object.keys(err).length) {
+    response.success = false;
+    response.errors = err;
+  }
+
+  return response;
+};
 
 /**
  * @route   POST api/auth/login
@@ -16,17 +42,16 @@ const router = Router();
  */
 
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+  const { errors, isValid } = validateLoginInput(req.body);
+  console.log(errors);
+  if (!isValid) return res.status(400).json(errors);
 
-  // Simple validation
-  if (!email || !password) {
-    return res.status(400).json({ msg: 'Please enter all fields' });
-  }
+  const { email, password } = req.body;
 
   try {
     // Check for existing user
     const user = await User.findOne({ email });
-    if (!user) throw Error('User Does not exist');
+    if (!user) throw Error('User does not exist');
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw Error('Invalid credentials');
@@ -43,7 +68,8 @@ router.post('/login', async (req, res) => {
       }
     });
   } catch (e) {
-    res.status(400).json({ msg: e.message });
+    const err = e.message === 'User does not exist' ? { email: e.message } : { error: e.message };
+    res.status(400).json(err);
   }
 });
 
@@ -54,12 +80,10 @@ router.post('/login', async (req, res) => {
  */
 
 router.post('/register', async (req, res) => {
-  const { name, email, password } = req.body;
+  const { errors, isValid } = validateRegisterInput(req.body);
+  if (!isValid) return res.status(400).json(errors);
 
-  // Simple validation
-  if (!name || !email || !password) {
-    return res.status(400).json({ msg: 'Please enter all fields' });
-  }
+  const { name, email, password } = req.body;
 
   try {
     const user = await User.findOne({ email });
@@ -93,7 +117,8 @@ router.post('/register', async (req, res) => {
       }
     });
   } catch (e) {
-    res.status(400).json({ error: e.message });
+    const err = e.message === 'User already exists' ? { email: e.message } : { error: e.message };
+    res.status(400).json(err);
   }
 });
 
@@ -106,7 +131,7 @@ router.post('/register', async (req, res) => {
 router.get('/user', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
-    if (!user) throw Error('User Does not exist');
+    if (!user) throw Error('User does not exist');
     res.json(user);
   } catch (e) {
     res.status(400).json({ msg: e.message });
